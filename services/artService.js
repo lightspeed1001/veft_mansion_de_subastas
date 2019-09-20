@@ -1,6 +1,11 @@
+const Art = require('../data/db').Art;
+
 const artService = () => {
     const getAllArts = (cb, errorCb) => {
-        // Your implementation goes here
+        return await globalTryCatch(async () => {
+            const art = await Art.find({});
+            return art;
+        });
     };
 
     const getArtById = (id, cb, errorCb) => {
