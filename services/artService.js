@@ -1,27 +1,30 @@
 const Art = require('../data/db').Art;
 
-const globalTryCatch = async cb => {
-    try {
-      return await cb();
-    } catch(err) {
-      return err;
-    }
-  }
-
 const artService = () => {
     const getAllArts = async (cb, errorCb) => {
-        return await globalTryCatch(async () => {
-            const art = await Art.find({});
-            return art;
-        });
+        try {
+            return await Art.find({});
+        } catch(err) {
+            return err;
+        }
     };
 
-    const getArtById = (id, cb, errorCb) => {
-        // Your implementation goes here
+    const getArtById = async (id, cb, errorCb) => {
+        try {
+            return await Art.findById(id);
+        } catch(err) {
+            return err;
+        }
     };
 
     const createArt = (art, cb, errorCb) => {
-        // Your implementation goes here
+        Art.create(art, function(err, result) {
+            if (err) {
+                return errorCb();
+            } else {
+                return cb(result);
+            }
+        })
     };
 
     return {
