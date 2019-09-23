@@ -24,7 +24,7 @@ const artService = () => {
             } else {
                 return cb(result);
             }
-        })
+        });
     };
 
     return {

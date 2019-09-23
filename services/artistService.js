@@ -1,14 +1,30 @@
+const Artist = require('../data/db').Artist;
+
 const artistService = () => {
     const getAllArtists = (cb, errorCb) => {
-        // Your implementation goes here
+        try {
+            return Artist.find({});
+        } catch(err) {
+            return err;
+        }
     };
 
     const getArtistById = (id, cb, errorCb) => {
-        // Your implementation goes here
+        try {
+            return Artist.findById(id);
+        } catch(err) {
+            return err;
+        }
     };
 
     const createArtist = (artist, cb, errorCb) => {
-        // Your implementation goes here
+        Artist.create(artist, function(err, result) {
+            if (err) {
+                return errorCb();
+            } else {
+                return cb(result);
+            }
+        });
     };
 
     return {
