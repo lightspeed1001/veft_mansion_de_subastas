@@ -32,20 +32,19 @@ app.post('/api/arts', function(req, res) {
     }
   );
 });
-// TODO: change artist to artists
 // http://localhost:3000/api/artist [GET]
-app.get('/api/artist', async function(req, res) {
+app.get('/api/artists', async function(req, res) {
   const result = await artistService.getAllArtists();
   return res.json(result);
 });
 
-app.get('/api/artist/:id', async function(req, res) {
+app.get('/api/artists/:id', async function(req, res) {
   const id = req.params.id;
   const result = await artistService.getArtistById(id);
   return res.json(result);
 });
 
-app.post('/api/artist', function(req, res) {
+app.post('/api/artists', function(req, res) {
   artistService.createArtist(
     req.body,
     function(art) {
@@ -98,12 +97,12 @@ app.post('/api/customers', function(req, res) {
 });
 
 // TODO Doesn't work!
-// http://localhost:3000/api/customers/:id/auction-bids [GET] 
+// http://localhost:3000/api/customers/:id/auction-bids [GET]
 app.get('/api/customers/:id/auction-bids', async function(req, res) {
   const id = req.params.id;
   try {
     customerService.getCustomerAuctionBids(id, function(auctions) {
-      try{  
+      try{
        return res.status(200).json(auctions);
       } catch(e){
         // Weird db error
@@ -130,7 +129,44 @@ app.get('/api/auctions', async function(req, res) {
   });
 });
 
+app.get('/api/auctions/:id', async function(req, res) {
+  const id = req.params.id;
+  try{
+    auctionService.getAuctionById(id, function(auction) {
+      return res.status(200).json(auction);
+    }, function(error) {
+      // Customer not found
+      return res.status(404).json(error);
+    });
+  } catch(err) {
+    // Weird database error
+    return res.status(500).json(err);
+  }
+});
 
+// http://localhost:3000/api/customers/:id/auction-bids [GET]
+app.get('/api/auctions/:id/winner', async function(req, res) {
+  const id = req.params.id;
+    console.log("route started");
+    auctionService.getAuctionWinner(id, function( winner ) {
+      return res.status(200).json(winner);
+    }, function(status) {
+      console.log('error');
+      return res.status(status).json();
+    })
+});
+
+app.post('/api/auctions', function(req, res) {
+  auctionService.createAuction(
+    req.body,
+    function(auction) {
+      return res.status(201).json(auction);
+    },
+    function(err) {
+      return res.status(err).json();
+    }
+  );
+});
 
 // http://localhost:3000
 app.listen(3000, function() {

@@ -20,6 +20,7 @@ const artService = () => {
     const createArt = (art, cb, errorCb) => {
         Art.create(art, function(err, result) {
             if (err) {
+                console.log(err);
                 return errorCb();
             } else {
                 return cb(result);
