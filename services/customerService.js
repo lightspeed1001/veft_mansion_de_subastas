@@ -23,9 +23,10 @@ const customerService = () => {
             if(customer === null) {  }
             else {
                 // Fara í auctionbid.js
-                bids = AuctionBid.find(bid => bid.customerId == customerId, function(err, bids){
+                bids = AuctionBid.find({ customerId: customerId }, function(err, bids){
                     if(err) { throw new Error(err); }
                     else {
+                        console.log(bids);
                         cb(bids);
                     }
                 });
