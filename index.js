@@ -106,7 +106,7 @@ app.get('/api/customers/:id/auction-bids', async function(req, res) {
       try{  
        return res.status(200).json(auctions);
       } catch(e){
-        // idk, just testing at this point
+        // Weird db error
         return res.status(500).json(e);
       }
     }, function(error){
@@ -114,7 +114,7 @@ app.get('/api/customers/:id/auction-bids', async function(req, res) {
       return res.status(404).json(error);
     })
   } catch (err) {
-    // Weird database error
+    // Weird db error 2: err harder
     return res.status(500).json(err);
   }
 });

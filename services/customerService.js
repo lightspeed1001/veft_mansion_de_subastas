@@ -17,22 +17,18 @@ const customerService = () => {
         })
     };
 
-    // TODO Doesn't work!
     const getCustomerAuctionBids = (customerId, cb, errorCb) => {
         getCustomerById(customerId, function(customer) {
             if(customer === null) {  }
             else {
-                // Fara í auctionbid.js
                 bids = AuctionBid.find({ customerId: customerId }, function(err, bids){
                     if(err) { throw new Error(err); }
                     else {
-                        console.log(bids);
                         cb(bids);
                     }
                 });
             }
         }, function(err) {
-            // customer not found
             errorCb();
         });
     };
