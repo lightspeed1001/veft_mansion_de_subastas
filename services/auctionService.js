@@ -68,7 +68,7 @@ const auctionService = () => {
                 if (err) {
                     errorCb(500);
                 } else {
-                    cb(auction);
+                  cb(auction);
                 }
             });
         }
@@ -82,38 +82,50 @@ const auctionService = () => {
     })
   };
 
-  const placeNewBid = (auctionId, customerId, price, cb, errorCb) => {
-    // Make sure auctionId and customerId are valid
-    Auction.findById(auctionId, function(err, auction) {
-      if(err) errorCb(500);
+  function processBidsWrapper(auction, auctionId, customerId, price, cb, errorCb) {
+    return function processBids (bids) {
+      maxBid = 0;
+      bids.forEach(element => {
+        if(element.price >= maxBid) maxBid = element.price;
+      });
+      
+      if(maxBid >= price) errorCb(412);
+      else {  
+        Bids.create({auctionId: auctionId, customerId:customerId, price:price}, function(err, bid) {
+          if(err) errorCb(500);
+          else cb(bid);
+        });
+        auction.auctionWinner = customerId;
+      }
+    }
+  }
+
+  function placeBidWithCustomerWrapper (auction, auctionId, customerId, price, cb, errorCb) {
+    return function placeBidWithCustomer (err, customer) {
+      if(customer === null) errorCb(400);
+      else if(err) errorCb(400)
+      else {
+        getAuctionBidsWithinAuction(auctionId, 
+          processBidsWrapper(auction, auctionId, customerId, price, cb, errorCb), 
+          function(err){ errorCb(404); }
+        );
+      }
+    }
+  }
+
+  function placeBidWithAuctionWrapper (auctionId, customerId, price, cb, errorCb) {
+    return function pladeBidWithAuction (err, auction) {
+      if(err) errorCb(404);
       else if(auction === null) errorCb(404);
       else if(auction.minimumPrice > price) errorCb(412);
       else if(new Date(auction.endDate) < new Date()) errorCb(403);
-      else{
-        Customer.findById(customerId, function(err, customer) {
-          // Check if bid is high enough
-          if(customer === null) errorCb(404);
-          else {
-            getAuctionBidsWithinAuction(auctionId, function(bids) {
-              maxBid = auction.minimumPrice;
-              bids.forEach(element => {
-                if(element.price >= maxBid) maxBid = element.price;
-              });
-              if(maxBid >= price) errorCb(412);
-              else{
-                  Bids.create({auctionId: auctionId, customerId:customerId, price:price}, function(err, bid) {
-                    if(err) errorCb(500);
-                    else cb(bid);
-                  });
-                  auction.auctionWinner = customerId;
-              }
-            }, function(err){
-              errorCb(404);
-            });
-          }
-        });
-      }
-    });
+      else Customer.findById(customerId, placeBidWithCustomerWrapper(auction, auctionId, customerId, price, cb, errorCb));
+    }
+  }
+
+  const placeNewBid = (auctionId, customerId, price, cb, errorCb) => {
+    // Make sure auctionId and customerId are valid
+    Auction.findById(auctionId, placeBidWithAuctionWrapper(auctionId, customerId, price, cb, errorCb));
   };
 
   return {
