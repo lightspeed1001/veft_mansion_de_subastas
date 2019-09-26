@@ -93,9 +93,13 @@ const auctionService = () => {
       else {  
         Bids.create({auctionId: auctionId, customerId:customerId, price:price}, function(err, bid) {
           if(err) errorCb(500);
-          else cb(bid);
+          else 
+          {
+            auction.auctionWinner = customerId;
+            auction.save();
+            cb(bid);
+          }
         });
-        auction.auctionWinner = customerId;
       }
     }
   }
