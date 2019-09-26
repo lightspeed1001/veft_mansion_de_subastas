@@ -28,8 +28,8 @@ app.post('/api/arts', function(req, res) {
     function(art) {
       return res.status(201).json(art);
     },
-    function(err) {
-      return res.status(400).json(err);
+    function(status, err) {
+      return res.status(status).json(err);
     }
   );
 });
@@ -53,8 +53,8 @@ app.post('/api/artists', function(req, res) {
     function(art) {
       return res.status(201).json(art);
     },
-    function(err) {
-      return res.status(400).json(err);
+    function(status, err) {
+      return res.status(status).json(err);
     }
   );
 });
@@ -64,9 +64,9 @@ app.post('/api/artists', function(req, res) {
 app.get('/api/customers', async function(req, res) {
   customerService.getAllCustomers(function(customers) {
     return res.status(200).json(customers);
-  }, function(err) {
+  }, function(status, err) {
     // Weird database error
-    return res.status(err).json();
+    return res.status(status).json(err);
   });
 });
 
@@ -75,9 +75,9 @@ app.get('/api/customers/:id', async function(req, res) {
   const id = req.params.id;
   customerService.getCustomerById(id, function(customer) {
     return res.status(200).json(customer);
-  }, function(err) {
+  }, function(status, err) {
     // Customer not found
-    return res.status(err).json();
+    return res.status(status).json(err);
   });
 });
 
@@ -88,9 +88,8 @@ app.post('/api/customers', function(req, res) {
     function(cust) {
       return res.status(201).json(cust);
     },
-    function(err) {
-      // Weird database error
-      return res.status(err).json();
+    function(status, err) {
+      return res.status(status).json(err);
     }
   );
 });
@@ -99,15 +98,9 @@ app.post('/api/customers', function(req, res) {
 app.get('/api/customers/:id/auction-bids', async function(req, res) {
   const id = req.params.id;
   customerService.getCustomerAuctionBids(id, function(auctions) {
-    try{
       return res.status(200).json(auctions);
-    } catch(err){
-      // Weird db error
-      return res.status(500).json(err);
-    }
-  }, function(err){
-    // Customer not found
-    return res.status(err).json();
+  }, function(status, err){
+    return res.status(status).json(err);
   });
 });
 
@@ -116,25 +109,18 @@ app.get('/api/customers/:id/auction-bids', async function(req, res) {
 app.get('/api/auctions', async function(req, res) {
   auctionService.getAllAuctions(function(auctions) {
     return res.status(200).json(auctions);
-  }, function(error) {
-    // Weird database error
-    return res.status(500).json(error);
+  }, function(status, err) {
+    return res.status(status).json(err);
   });
 });
 
 app.get('/api/auctions/:id', async function(req, res) {
   const id = req.params.id;
-  try{
     auctionService.getAuctionById(id, function(auction) {
       return res.status(200).json(auction);
-    }, function(error) {
-      // Customer not found
-      return res.status(404).json(error);
+    }, function(status, err) {
+      return res.status(status).json(err);
     });
-  } catch(err) {
-    // Weird database error
-    return res.status(500).json(err);
-  }
 });
 
 // http://localhost:3000/api/customers/:id/auction-bids [GET]
@@ -143,9 +129,9 @@ app.get('/api/auctions/:id/winner', async function(req, res) {
     console.log("route started");
     auctionService.getAuctionWinner(id, function( winner ) {
       return res.status(200).json(winner);
-    }, function(status) {
+    }, function(status, err) {
       console.log('error');
-      return res.status(status).json();
+      return res.status(status).json(err);
     })
 });
 
@@ -154,8 +140,8 @@ app.get('/api/auctions/:id/bids', async function(req, res) {
   const id = req.params.id;
     auctionService.getAuctionBidsWithinAuction(id, function(bids) {
       return res.status(200).json(bids);
-    }, function(status) {
-      return res.status(status).json();
+    }, function(status, err) {
+      return res.status(status).json(err);
     })
 });
 
@@ -168,8 +154,8 @@ app.post('/api/auctions/:id/bids', function(req, res) {
     function(auction) {
       return res.status(201).json(auction);
     },
-    function(err) {
-      return res.status(err).json();
+    function(status, err) {
+      return res.status(status).json(err);
     }
   );
 });
@@ -180,8 +166,8 @@ app.post('/api/auctions', function(req, res) {
     function(auction) {
       return res.status(201).json(auction);
     },
-    function(err) {
-      return res.status(err).json();
+    function(status, err) {
+      return res.status(status).json(err);
     }
   );
 });

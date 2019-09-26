@@ -20,7 +20,7 @@ const artistService = () => {
     const createArtist = (artist, cb, errorCb) => {
         Artist.create(artist, function(err, result) {
             if (err) {
-                return errorCb();
+                return errorCb(400, err);
             } else {
                 return cb(result);
             }

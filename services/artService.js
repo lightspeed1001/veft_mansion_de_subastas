@@ -21,7 +21,7 @@ const artService = () => {
         Art.create(art, function(err, result) {
             if (err) {
                 console.log(err);
-                return errorCb();
+                return errorCb(400, err);
             } else {
                 return cb(result);
             }

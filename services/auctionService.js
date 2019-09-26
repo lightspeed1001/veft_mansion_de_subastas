@@ -7,7 +7,7 @@ const auctionService = () => {
   const getAllAuctions = (cb, errorCb) => {
     Auction.find({}, function(err, auctions) {
       if (err) {
-        errorCb(err);
+        errorCb(500, err);
       } else {
         cb(auctions);
       }
@@ -17,9 +17,9 @@ const auctionService = () => {
   const getAuctionById = (id, cb, errorCb) => {
     Auction.findById(id, function(err, auction) {
       if (err) {
-        throw new Error(err);
+        errorCb(500, err)
       } else if (auction === null) {
-        errorCb();
+        errorCb(404, err);
       } else {
         cb(auction);
       }
@@ -30,22 +30,22 @@ const auctionService = () => {
     Auction.findById(auctionId, function(err, auction) {
       if (err) {
           console.log('error in find auction');
-        throw new Error(err);
+        errorCb(500, err)
       } else if (auction === null) {
           console.log('no auction found');
-        errorCb(404);
+        errorCb(404, err);
       } else if (new Date(auction.endDate) > new Date()) {
           console.log('auction has not ended yet');
-        errorCb(409);
+        errorCb(409, err);
       } else {
         console.log('found auction: ', auction);
         Customer.findById(auction.auctionWinner, function(err, customer) {
           if (err) {
               console.log('error in find customer');
-            throw new Error(err);
+              errorCb(500, err)
           } else if (customer === null) {
               console.log('customer not found');
-              errorCb(404);
+              errorCb(404, err);
           } else {
               console.log('customer found: ', customer);
               cb(customer);
@@ -58,15 +58,15 @@ const auctionService = () => {
   const createAuction = (auction, cb, errorCb) => {
     Art.findById(auction.artId, function(err, art) {
         if (err) {
-            errorCb(500);
+            errorCb(500, err);
         } else if(art === null) {
-            errorCb(400);
+            errorCb(400, err);
         } else if(!art.isAuctionItem) {
-            errorCb(412);
+            errorCb(412, err);
         } else {
             Auction.create(auction, function(err, auction) {
                 if (err) {
-                    errorCb(500);
+                    errorCb(500, err);
                 } else {
                   cb(auction);
                 }
@@ -77,10 +77,24 @@ const auctionService = () => {
 
   const getAuctionBidsWithinAuction = (auctionId, cb, errorCb) => {
     Bids.find({auctionId: auctionId}, function(err, bids) {
-      if(err) errorCb(404);
+      if(err) errorCb(404, err);
       else cb(bids)
     })
   };
+
+  function saveBidWrapper(auction, customerId, cb, errorCb){
+    return function(err, bid) {
+      if(err) errorCb(500, err);
+      else 
+      {
+        auction.auctionWinner = customerId;
+        auction.save(function cb(err) {
+          if(err) errorCb(500, err);
+          else cb(bid);
+        });
+      }
+    }
+  }
 
   function processBidsWrapper(auction, auctionId, customerId, price, cb, errorCb) {
     return function processBids (bids) {
@@ -89,29 +103,21 @@ const auctionService = () => {
         if(element.price >= maxBid) maxBid = element.price;
       });
       
-      if(maxBid >= price) errorCb(412);
+      if(maxBid >= price) errorCb(412, null);
       else {  
-        Bids.create({auctionId: auctionId, customerId:customerId, price:price}, function(err, bid) {
-          if(err) errorCb(500);
-          else 
-          {
-            auction.auctionWinner = customerId;
-            auction.save();
-            cb(bid);
-          }
-        });
+        Bids.create({auctionId: auctionId, customerId:customerId, price:price}, saveBidWrapper(auction, customerId, cb, errorCb));
       }
     }
   }
 
   function placeBidWithCustomerWrapper (auction, auctionId, customerId, price, cb, errorCb) {
     return function placeBidWithCustomer (err, customer) {
-      if(customer === null) errorCb(400);
-      else if(err) errorCb(400)
+      if(customer === null) errorCb(400, err);
+      else if(err) errorCb(400, err)
       else {
         getAuctionBidsWithinAuction(auctionId, 
           processBidsWrapper(auction, auctionId, customerId, price, cb, errorCb), 
-          function(err){ errorCb(404); }
+          function(err){ errorCb(404, err); }
         );
       }
     }
@@ -119,10 +125,10 @@ const auctionService = () => {
 
   function placeBidWithAuctionWrapper (auctionId, customerId, price, cb, errorCb) {
     return function pladeBidWithAuction (err, auction) {
-      if(err) errorCb(404);
-      else if(auction === null) errorCb(404);
-      else if(auction.minimumPrice > price) errorCb(412);
-      else if(new Date(auction.endDate) < new Date()) errorCb(403);
+      if(err) errorCb(404, err);
+      else if(auction === null) errorCb(404, err);
+      else if(auction.minimumPrice > price) errorCb(412, err);
+      else if(new Date(auction.endDate) < new Date()) errorCb(403, err);
       else Customer.findById(customerId, placeBidWithCustomerWrapper(auction, auctionId, customerId, price, cb, errorCb));
     }
   }
