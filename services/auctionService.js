@@ -1,6 +1,7 @@
 const Auction = require('../data/db').Auction;
 const Customer = require('../data/db').Customer;
 const Art = require('../data/db').Art;
+const Bids = require('../data/db').AuctionBid;
 
 const auctionService = () => {
   const getAllAuctions = (cb, errorCb) => {
@@ -75,11 +76,44 @@ const auctionService = () => {
   };
 
   const getAuctionBidsWithinAuction = (auctionId, cb, errorCb) => {
-    // Your implementation goes here
+    Bids.find({auctionId: auctionId}, function(err, bids) {
+      if(err) errorCb(404);
+      else cb(bids)
+    })
   };
 
   const placeNewBid = (auctionId, customerId, price, cb, errorCb) => {
-    // Your implementation goes here
+    // Make sure auctionId and customerId are valid
+    Auction.findById(auctionId, function(err, auction) {
+      if(err) errorCb(500);
+      else if(auction === null) errorCb(404);
+      else if(auction.minimumPrice > price) errorCb(412);
+      else if(new Date(auction.endDate) < new Date()) errorCb(403);
+      else{
+        Customer.findById(customerId, function(err, customer) {
+          // Check if bid is high enough
+          if(customer === null) errorCb(404);
+          else {
+            getAuctionBidsWithinAuction(auctionId, function(bids) {
+              maxBid = auction.minimumPrice;
+              bids.forEach(element => {
+                if(element.price >= maxBid) maxBid = element.price;
+              });
+              if(maxBid >= price) errorCb(412);
+              else{
+                  Bids.create({auctionId: auctionId, customerId:customerId, price:price}, function(err, bid) {
+                    if(err) errorCb(500);
+                    else cb(bid);
+                  });
+                  auction.auctionWinner = customerId;
+              }
+            }, function(err){
+              errorCb(404);
+            });
+          }
+        });
+      }
+    });
   };
 
   return {

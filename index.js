@@ -149,6 +149,31 @@ app.get('/api/auctions/:id/winner', async function(req, res) {
     })
 });
 
+// http://localhost:3000/api/customers/:id/auction-bids [GET]
+app.get('/api/auctions/:id/bids', async function(req, res) {
+  const id = req.params.id;
+    auctionService.getAuctionBidsWithinAuction(id, function(bids) {
+      return res.status(200).json(bids);
+    }, function(status) {
+      return res.status(status).json();
+    })
+});
+
+app.post('/api/auctions/:id/bids', function(req, res) {
+  const auctionId = req.params.id;
+  const customerId = req.body.customerId;
+  const price = req.body.price;
+  auctionService.placeNewBid(
+    auctionId, customerId, price,
+    function(auction) {
+      return res.status(201).json(auction);
+    },
+    function(err) {
+      return res.status(err).json();
+    }
+  );
+});
+
 app.post('/api/auctions', function(req, res) {
   auctionService.createAuction(
     req.body,
