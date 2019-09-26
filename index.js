@@ -9,6 +9,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
+// Arts
 // http://localhost:3000/api/arts [GET]
 app.get('/api/arts', async function(req, res) {
   const result = await artService.getAllArts();
@@ -32,6 +33,8 @@ app.post('/api/arts', function(req, res) {
     }
   );
 });
+
+// Artists
 // http://localhost:3000/api/artist [GET]
 app.get('/api/artists', async function(req, res) {
   const result = await artistService.getAllArtists();
@@ -56,30 +59,26 @@ app.post('/api/artists', function(req, res) {
   );
 });
 
+// Customers
 // http://localhost:3000/api/customers [GET]
 app.get('/api/customers', async function(req, res) {
   customerService.getAllCustomers(function(customers) {
     return res.status(200).json(customers);
-  }, function(error) {
+  }, function(err) {
     // Weird database error
-    return res.status(500).json(error);
+    return res.status(err).json();
   });
 });
 
 // http://localhost:3000/api/customers/id [GET]
 app.get('/api/customers/:id', async function(req, res) {
   const id = req.params.id;
-  try{
-    customerService.getCustomerById(id, function(customer) {
-      return res.status(200).json(customer);
-    }, function(error) {
-      // Customer not found
-      return res.status(404).json(error);
-    });
-  } catch(err) {
-    // Weird database error
-    return res.status(500).json(err);
-  }
+  customerService.getCustomerById(id, function(customer) {
+    return res.status(200).json(customer);
+  }, function(err) {
+    // Customer not found
+    return res.status(err).json();
+  });
 });
 
 // http://localhost:3000/api/customers [POST]
@@ -91,34 +90,28 @@ app.post('/api/customers', function(req, res) {
     },
     function(err) {
       // Weird database error
-      return res.status(500).json(err);
+      return res.status(err).json();
     }
   );
 });
 
-// TODO Doesn't work!
 // http://localhost:3000/api/customers/:id/auction-bids [GET]
 app.get('/api/customers/:id/auction-bids', async function(req, res) {
   const id = req.params.id;
-  try {
-    customerService.getCustomerAuctionBids(id, function(auctions) {
-      try{
-       return res.status(200).json(auctions);
-      } catch(e){
-        // Weird db error
-        return res.status(500).json(e);
-      }
-    }, function(error){
-      // Customer not found
-      return res.status(404).json(error);
-    })
-  } catch (err) {
-    // Weird db error 2: err harder
-    return res.status(500).json(err);
-  }
+  customerService.getCustomerAuctionBids(id, function(auctions) {
+    try{
+      return res.status(200).json(auctions);
+    } catch(err){
+      // Weird db error
+      return res.status(500).json(err);
+    }
+  }, function(err){
+    // Customer not found
+    return res.status(err).json();
+  });
 });
 
-
+// Auctions
 // http://localhost:3000/api/auctions [GET]
 app.get('/api/auctions', async function(req, res) {
   auctionService.getAllAuctions(function(auctions) {
