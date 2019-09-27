@@ -6,6 +6,7 @@ const customerService = require('./services/customerService');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const port = 3000;
 
 app.use(bodyParser.json());
 
@@ -233,3 +234,6 @@ app.post('/api/auctions', function(req, res) {
 app.listen(3000, function() {
   console.log('Server is listening on port 3000');
 });
+
+//app.use('/api', app);
+//app.listen(port || process.env.PORT, () => console.log(`Server listening on port ${port}`));

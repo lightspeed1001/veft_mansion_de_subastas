@@ -185,13 +185,17 @@ const auctionService = () => {
     };
   }
 
-  const placeNewBid = (auctionId, customerId, price, cb, errorCb) => {
-    // Make sure auctionId and customerId are valid
-    Auction.findById(
-      auctionId,
-      placeBidWithAuctionWrapper(auctionId, customerId, price, cb, errorCb)
-    );
-  };
+    const placeNewBid = (auctionId, customerId, price, cb, errorCb) => {
+        Auction.findById(auctionId, (error, auction) => {
+            if (error) err(error);
+            else if (auction === null) err(getNotFoundError('Auction', '_id', auctionId));
+            else if (auction.endDate <
+                new Date()) err(getCustomError(403, 'Auction has finished'));
+            else if (auction.minimumPrice >
+                price) err(getCustomError(412, 'Bid has to be higher or equal to minimum asking price'));
+            else placeBidWithAuctionWrapper(auctionId, customerId, price, cb, errorCb);
+        });
+    };
 
   return {
     getAllAuctions,
