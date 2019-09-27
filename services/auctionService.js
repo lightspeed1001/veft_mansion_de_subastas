@@ -19,7 +19,7 @@ const auctionService = () => {
       if (err) {
         errorCb(500, err);
       } else if (auction === null) {
-        errorCb(404, 'Auction not fount');
+        errorCb(404, 'Auction not found');
       } else {
         cb(auction);
       }
@@ -93,10 +93,10 @@ const auctionService = () => {
   function saveBidWrapper(auction, customerId, cb, errorCb) {
     return function(err, bid) {
       if (err) {
-        errorCb(500, 'Internal database error');
+        errorCb(500, 'Internal database error 1');
       } else {
         auction.auctionWinner = customerId;
-        auction.save(function cb(err) {
+        auction.save(function save_cb(err, doc, rows) {
           if (err) errorCb(500, 'Internal database error');
           else cb(bid);
         });
@@ -118,7 +118,7 @@ const auctionService = () => {
         if (element.price >= maxBid) maxBid = element.price;
       });
 
-      if (maxBid >= price) errorCb(412, null);
+      if (maxBid >= price) errorCb(412, "Price not high enough");
       else {
         Bids.create(
           { auctionId: auctionId, customerId: customerId, price: price },
@@ -137,8 +137,8 @@ const auctionService = () => {
     errorCb
   ) {
     return function placeBidWithCustomer(err, customer) {
-      if (customer === null) errorCb(400, err);
-      else if (err) errorCb(400, err);
+      if (err) errorCb(400, err);
+      else if (customer === null) errorCb(400, "Customer not found");
       else {
         getAuctionBidsWithinAuction(
           auctionId,
@@ -167,9 +167,9 @@ const auctionService = () => {
   ) {
     return function pladeBidWithAuction(err, auction) {
       if (err) errorCb(404, err);
-      else if (auction === null) errorCb(404, err);
-      else if (auction.minimumPrice > price) errorCb(412, err);
-      else if (new Date(auction.endDate) < new Date()) errorCb(403, err);
+      else if (auction === null) errorCb(404, "Auction not found");
+      else if (auction.minimumPrice >= price) errorCb(412, "Price not high enough");
+      else if (new Date(auction.endDate) < new Date()) errorCb(403, "Auction has already ended");
       else
         Customer.findById(
           customerId,

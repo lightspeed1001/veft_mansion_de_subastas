@@ -173,14 +173,12 @@ app.get('/api/auctions/:id', async function(req, res) {
 // http://localhost:3000/api/customers/:id/auction-bids [GET]
 app.get('/api/auctions/:id/winner', async function(req, res) {
   const id = req.params.id;
-  console.log('route started');
   auctionService.getAuctionWinner(
     id,
     function(winner) {
       return res.status(200).json(winner);
     },
     function(status, err) {
-      console.log('error');
       return res.status(status).json(err);
     }
   );
