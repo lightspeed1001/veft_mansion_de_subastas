@@ -51,7 +51,7 @@ const auctionService = () => {
   const createAuction = (auction, cb, errorCb) => {
     Art.findById(auction.artId, function(err, art) {
       if (err) {
-        errorCb(500, 'Iternal database error');
+        errorCb(500, 'Internal database error');
       } else if (art === null) {
         errorCb(400, 'Art not found');
       } else if (!art.isAuctionItem) {
@@ -59,12 +59,12 @@ const auctionService = () => {
       } else {
         Auction.find({ artId: auction.artId }, function(err, auction) {
           if (err) {
-            errorCb(500, 'Iternal database error');
+            errorCb(500, 'Internal database error');
           }
           if (auction === null || new Dare(auction.endDate) < new Date()) {
             Auction.create(auction, function(err, auction) {
               if (err) {
-                errorCb(500, 'Iternal database error');
+                errorCb(500, 'Internal database error');
               } else {
                 cb();
               }

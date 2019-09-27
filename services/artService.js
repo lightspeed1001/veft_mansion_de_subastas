@@ -27,13 +27,13 @@ const artService = () => {
   const createArt = (art, cb, errorCb) => {
     Artist.findById(art.artistId, (err, result) => {
       if (err) {
-        errorCb(500, 'internal database error');
+        errorCb(500, 'Internal database error');
       } else if (result === null) {
         errorCb(400, 'Artist not found');
       } else {
         Art.create(art, function(err, result) {
           if (err) {
-            return errorCb(500, 'internal database error');
+            return errorCb(500, 'Internal database error');
           } else {
             return cb();
           }
