@@ -17,8 +17,9 @@ const customerService = () => {
       if (err) {
         errorCb(500, 'Internal database error');
       } else if (customer === null) {
-        errorCb(404, 'Customer not found');
-      } else {
+          err(getNotFoundError('customer', 'id', id));
+      }
+      else {
         cb(customer);
       }
     });
@@ -29,7 +30,10 @@ const customerService = () => {
       customerId,
       function(customer) {
         bids = AuctionBid.find({ customerId: customerId }, function(err, bids) {
-          if (err) {
+            if (customer === null) {
+                err(getNotFoundError('customer', 'id', id));
+            }
+            else if (err) {
             errorCb(500, err);
           } else {
             cb(bids);
