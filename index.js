@@ -157,6 +157,7 @@ app.get('/api/auctions', async function(req, res) {
   );
 });
 
+// http://localhost:3000/api/auctions/:id [GET]
 app.get('/api/auctions/:id', async function(req, res) {
   const id = req.params.id;
   auctionService.getAuctionById(
@@ -170,7 +171,7 @@ app.get('/api/auctions/:id', async function(req, res) {
   );
 });
 
-// http://localhost:3000/api/customers/:id/auction-bids [GET]
+// http://localhost:3000/api/auctions/:id/winner [GET]
 app.get('/api/auctions/:id/winner', async function(req, res) {
   const id = req.params.id;
   auctionService.getAuctionWinner(
@@ -184,7 +185,7 @@ app.get('/api/auctions/:id/winner', async function(req, res) {
   );
 });
 
-// http://localhost:3000/api/customers/:id/auction-bids [GET]
+// http://localhost:3000/api/auctions/:id/auction-bids [GET]
 app.get('/api/auctions/:id/bids', async function(req, res) {
   const id = req.params.id;
   auctionService.getAuctionBidsWithinAuction(
@@ -198,6 +199,7 @@ app.get('/api/auctions/:id/bids', async function(req, res) {
   );
 });
 
+// http://localhost:3000/api/auctions/:id/auction-bids [POST]
 app.post('/api/auctions/:id/bids', function(req, res) {
   const auctionId = req.params.id;
   const customerId = req.body.customerId;
@@ -206,20 +208,20 @@ app.post('/api/auctions/:id/bids', function(req, res) {
     auctionId,
     customerId,
     price,
-    function(auction) {
-      return res.status(201).json(auction);
+    function() {
+      return res.status(201).json();
     },
     function(status, err) {
       return res.status(status).json(err);
     }
   );
 });
-
+// http://localhost:3000/api/auctions [POST]
 app.post('/api/auctions', function(req, res) {
   auctionService.createAuction(
     req.body,
-    function(auction) {
-      return res.status(201).json(auction);
+    function() {
+      return res.status(201).json();
     },
     function(status, err) {
       return res.status(status).json(err);

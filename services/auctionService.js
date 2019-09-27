@@ -98,7 +98,7 @@ const auctionService = () => {
         auction.auctionWinner = customerId;
         auction.save(function save_cb(err, doc, rows) {
           if (err) errorCb(500, 'Internal database error');
-          else cb(bid);
+          else cb();
         });
       }
     };
