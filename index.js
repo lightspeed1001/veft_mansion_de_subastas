@@ -41,7 +41,7 @@ app.post('/api/arts', function(req, res) {
   artService.createArt(
     req.body,
     function() {
-      return res.send(201);
+      return res.status(201).json();
     },
     function(status, err) {
       return res.status(status).json(err);
@@ -81,7 +81,7 @@ app.post('/api/artists', function(req, res) {
   artistService.createArtist(
     req.body,
     function() {
-      return res.status(201);
+      return res.status(201).json();
     },
     function(status, err) {
       return res.status(status).json(err);
@@ -111,7 +111,6 @@ app.get('/api/customers/:id', async function(req, res) {
       return res.status(200).json(customer);
     },
     function(status, err) {
-      // Customer not found
       return res.status(status).json(err);
     }
   );
@@ -122,7 +121,7 @@ app.post('/api/customers', function(req, res) {
   customerService.createCustomer(
     req.body,
     function() {
-      return res.status(201);
+      return res.status(201).json();
     },
     function(status, err) {
       return res.status(status).json(err);

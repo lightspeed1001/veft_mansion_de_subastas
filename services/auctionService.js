@@ -17,7 +17,7 @@ const auctionService = () => {
   const getAuctionById = (id, cb, errorCb) => {
     Auction.findById(id, function(err, auction) {
       if (err) {
-        errorCb(500, err);
+        errorCb(500, 'Internal database error');
       } else if (auction === null) {
         errorCb(404, 'Auction not found');
       } else {
@@ -29,11 +29,11 @@ const auctionService = () => {
   const getAuctionWinner = (auctionId, cb, errorCb) => {
     Auction.findById(auctionId, function(err, auction) {
       if (err) {
-        errorCb(500, err);
+        errorCb(500, 'Internal database error');
       } else if (auction === null) {
         errorCb(404, 'Auction not found');
       } else if (new Date(auction.endDate) > new Date()) {
-        errorCb(409, err);
+        errorCb(409, 'Auction has not ended');
       } else {
         Customer.findById(auction.auctionWinner, function(err, customer) {
           if (err) {
@@ -48,32 +48,30 @@ const auctionService = () => {
     });
   };
 
-  const createAuction = (auction, cb, errorCb) => {
-    Art.findById(auction.artId, function(err, art) {
+  const createAuction = (new_auction, cb, errorCb) => {
+    Art.findById(new_auction.artId, function(err, art) {
       if (err) {
-        errorCb(500, 'Iternal database error');
+        errorCb(500, 'Internal database error');
       } else if (art === null) {
         errorCb(400, 'Art not found');
       } else if (!art.isAuctionItem) {
         errorCb(412, 'Selected art is not an auction item');
       } else {
-        Auction.find({ artId: auction.artId }, function(err, auction) {
+        Auction.findOne({ artId: new_auction.artId }, function(err, auction) {
           if (err) {
-            errorCb(500, 'Iternal database error');
+            errorCb(500, 'Internal database error');
           }
-          if (auction === null || new Dare(auction.endDate) < new Date()) {
-            Auction.create(auction, function(err, auction) {
+          else if (auction !== null){
+            errorCb(409, 'This piece is already up for auction');
+          }
+          else {
+            Auction.create(new_auction, function(err, created_auction) {
               if (err) {
-                errorCb(500, 'Iternal database error');
+                errorCb(500, 'Internal database error');
               } else {
                 cb();
               }
             });
-          } else {
-            errorCb(
-              409,
-              'There already is a current auction with the same art'
-            );
           }
         });
       }
@@ -93,7 +91,7 @@ const auctionService = () => {
   function saveBidWrapper(auction, customerId, cb, errorCb) {
     return function(err, bid) {
       if (err) {
-        errorCb(500, 'Internal database error 1');
+        errorCb(500, 'Internal database error');
       } else {
         auction.auctionWinner = customerId;
         auction.save(function save_cb(err, doc, rows) {
@@ -137,7 +135,7 @@ const auctionService = () => {
     errorCb
   ) {
     return function placeBidWithCustomer(err, customer) {
-      if (err) errorCb(400, err);
+      if (err) errorCb(400, "Internal database error");
       else if (customer === null) errorCb(400, "Customer not found");
       else {
         getAuctionBidsWithinAuction(
@@ -166,9 +164,9 @@ const auctionService = () => {
     errorCb
   ) {
     return function pladeBidWithAuction(err, auction) {
-      if (err) errorCb(404, err);
+      if (err) errorCb(404, "Internal database error");
       else if (auction === null) errorCb(404, "Auction not found");
-      else if (auction.minimumPrice >= price) errorCb(412, "Price not high enough");
+      else if (auction.minimumPrice > price) errorCb(412, "Price not high enough");
       else if (new Date(auction.endDate) < new Date()) errorCb(403, "Auction has already ended");
       else
         Customer.findById(

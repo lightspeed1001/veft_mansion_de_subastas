@@ -47,7 +47,7 @@ const customerService = () => {
       if (err) {
         errorCb(500, 'Internal database error');
       } else {
-        return cb();
+        cb();
       }
     });
   };

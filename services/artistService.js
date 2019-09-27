@@ -26,9 +26,9 @@ const artistService = () => {
   const createArtist = (artist, cb, errorCb) => {
     Artist.create(artist, function(err, result) {
       if (err) {
-        return errorCb(500, 'Internal database error');
+        errorCb(500, 'Internal database error');
       } else {
-        return cb();
+        cb();
       }
     });
   };
